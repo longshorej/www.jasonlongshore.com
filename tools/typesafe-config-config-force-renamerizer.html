@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>HOCON (Typesafe Config) CONFIG-FORCE-RENAMER-izer</title>
+    <style type="text/css">
+        body, html {
+            font-family: sans-serif;
+            padding: 0.25rem;
+        }
+
+        #input, #output {
+            display: block;
+            width: 100%;
+            height: 200px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            padding: 1rem;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <p>Paste a HOCON (Typesafe Config) path into the <strong>INPUT</strong> box below. Use the corresponding environment variable names in the <strong>OUTPUT</strong> box when configuring kustomization config values.</p>
+
+    <label for="input">INPUT</label>
+    <textarea id="input"></textarea>
+
+    <label for="input">OUTPUT</label>
+    <textarea id="output"></textarea>
+
+    <script type="text/javascript">
+        (function() {
+            const input = document.getElementById("input");
+            const output = document.getElementById("output");
+
+            const transform = (str) => {
+                // inverse of the following:
+                //
+                // With this option enabled only environment variables starting with CONFIG_FORCE_ are
+                // considered, and the name is mangled as follows:
+
+                // the prefix CONFIG_FORCE_ is stripped
+                // single underscore(_) is converted into a dot(.)
+                // double underscore(__) is converted into a dash(-)
+                // triple underscore(___) is converted into a single underscore(_)
+
+                return "CONFIG_FORCE_" + str.replaceAll("_", "___").replaceAll(".", "_").replaceAll("-", "__");
+            };
+
+            const updateOutput = () => {
+                let v = "";
+                for (const line of input.value.split(/\r?\n/)) {
+                    if (v !== "") {
+                        v += "\n";
+                    }
+                    v += transform(line);
+                }
+                output.value = v;
+            };
+
+            input.addEventListener("input", (event) => updateOutput());
+        })();
+
+    </script>
+</body>
+</html>
